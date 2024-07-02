@@ -1,0 +1,44 @@
+networks:
+  frontend:
+  backend:
+
+services:
+  php:
+    image: yiisoftware/yii2-php:7.4-apache
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./src:/app:delegated
+    ports:
+      - '8000:80'
+    networks:
+      - backend
+    depends_on:
+      - mysql
+  pma:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "81:80"
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: user
+      PMA_PASSWORD: password
+      UPLOAD_LIMIT: 1G
+    networks:
+      - backend
+  mysql:
+    image: mariadb:11.4
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: basic
+      MARIADB_USER: user
+      MARIADB_PASSWORD: password
+    ports:
+      - "3310:3306"
+    networks:
+      - backend
+    volumes:
+      - ./databases:/var/lib/mysql
